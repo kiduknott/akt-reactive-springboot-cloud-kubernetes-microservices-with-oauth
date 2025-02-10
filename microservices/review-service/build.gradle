@@ -16,6 +16,10 @@ jar {
 	enabled = false
 }
 
+ext{
+	mapStructVersion = "1.5.3.Final"
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -24,6 +28,21 @@ dependencies {
 
 	implementation project(':api')
 	implementation project(':util')
+
+	implementation "org.mapstruct:mapstruct:${mapStructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
+	compileOnly "org.mapstruct:mapstruct-processor:${mapStructVersion}"
+
+	implementation platform('org.testcontainers:testcontainers-bom:1.17.6')
+	testImplementation 'org.testcontainers:testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+
+	//Breaks the build
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	implementation 'com.mysql:mysql-connector-j'
+	testImplementation 'org.testcontainers:mysql'
 }
 
 tasks.named('test') {

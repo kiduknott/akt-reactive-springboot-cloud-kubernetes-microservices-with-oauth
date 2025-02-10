@@ -5,6 +5,8 @@ import com.akt.api.core.recommendation.RecommendationService;
 import com.akt.api.core.review.Review;
 import com.akt.api.core.review.ReviewService;
 import com.akt.api.exceptions.InvalidInputException;
+import com.akt.microservices.core.review.persistence.ReviewEntity;
+import com.akt.microservices.core.review.persistence.ReviewRepository;
 import com.akt.util.http.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +20,15 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewServiceImpl.class);
+
+    private final ReviewRepository repository;
+    private final ReviewMapper mapper;
     private final ServiceUtil serviceUtil;
 
     @Autowired
-    public ReviewServiceImpl(ServiceUtil serviceUtil) {
+    public ReviewServiceImpl(ReviewRepository repository, ReviewMapper mapper, ServiceUtil serviceUtil) {
+        this.repository = repository;
+        this.mapper = mapper;
         this.serviceUtil = serviceUtil;
     }
 
@@ -31,15 +38,9 @@ public class ReviewServiceImpl implements ReviewService {
             throw new InvalidInputException("Invalid productId: " + productId);
         }
 
-        if(productId == 213){
-            logger.debug("No reviews found for productId: {}", productId);
-            return new ArrayList<>();
-        }
-
-        List<Review> reviews = new ArrayList<>();
-        reviews.add(new Review(productId, 1, "Author 1", "Subject 1", "Content1", serviceUtil.getServiceAddress()));
-        reviews.add(new Review(productId, 2, "Author 2", "Subject 2", "Content2", serviceUtil.getServiceAddress()));
-        reviews.add(new Review(productId, 3, "Author 3", "Subject 3", "Content2", serviceUtil.getServiceAddress()));
+        List<ReviewEntity> entityList = repository.findByProductId(productId);
+        List<Review> reviews = mapper.entityListToApiList(entityList);
+        reviews.forEach(r -> r.setServiceAddress(serviceUtil.getServiceAddress()));
 
         logger.debug("/reviews response size: {}", reviews.size());
 
