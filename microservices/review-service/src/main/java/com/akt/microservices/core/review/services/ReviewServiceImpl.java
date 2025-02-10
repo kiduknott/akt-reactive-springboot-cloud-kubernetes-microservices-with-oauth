@@ -11,6 +11,7 @@ import com.akt.util.http.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -42,8 +43,28 @@ public class ReviewServiceImpl implements ReviewService {
         List<Review> reviews = mapper.entityListToApiList(entityList);
         reviews.forEach(r -> r.setServiceAddress(serviceUtil.getServiceAddress()));
 
-        logger.debug("/reviews response size: {}", reviews.size());
+        logger.debug("getReview: response size: {}", reviews.size());
 
         return reviews;
+    }
+
+    @Override
+    public Review createReview(Review body) {
+        try{
+            ReviewEntity entity = mapper.apiToEntity(body);
+            ReviewEntity newEntity = repository.save(entity);
+
+            logger.debug("createReview: created a new entity: {}/{}", body.getProductId(), body.getReviewId());
+            return mapper.entityToApi(newEntity);
+        }
+        catch (DataIntegrityViolationException exception){
+            throw new InvalidInputException("Duplicate key, Product Id:" + body.getProductId() + ", Review Id:" + body.getReviewId());
+        }
+    }
+
+    @Override
+    public void deleteReviews(int productId) {
+        logger.debug("deleteReviews: deleting reviews for product with productId: {}", productId);
+        repository.deleteAll(repository.findByProductId(productId));
     }
 }

@@ -41,12 +41,9 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 	void getReviewsByProductId(){
 		int productId = 1;
 
-		ArrayList<ReviewEntity> entities = new ArrayList<>();
-		entities.add(new ReviewEntity(productId, 1, "a1", "s1", "c1"));
-		entities.add(new ReviewEntity(productId, 2, "a2", "s2", "c2"));
-		entities.add(new ReviewEntity(productId, 3, "a3", "s3", "c3"));
-
-		repository.saveAll(entities);
+		postAndVerifyReview(productId, 1, OK);
+		postAndVerifyReview(productId, 2, OK);
+		postAndVerifyReview(productId, 3, OK);
 
 		assertEquals(3, repository.findByProductId(productId).size());
 
@@ -56,74 +53,71 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 				.jsonPath("$[2].reviewId").isEqualTo(3);
 	}
 
-	//@Test
-	void getReviewsOk(){
-		int productId = 1;
-
-		client.get()
-				.uri("/review?productId=" + productId)
-				.accept(APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(APPLICATION_JSON)
-				.expectBody()
-				.jsonPath("$.length()").isEqualTo(3)
-				.jsonPath("$[0].productId").isEqualTo(productId);
-	}
-
-	//@Test
+	@Test
 	void getReviewsNotFound() {
 		int productId = 213;
 
-		client.get()
-				.uri("/review?productId=" + productId)
-				.accept(APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(APPLICATION_JSON)
-				.expectBody()
+		getAndVerifyReviewsByProductId("?productId=213", OK)
 				.jsonPath("$.length()").isEqualTo(0);
 	}
 
-	//@Test
+	@Test
 	void getReviewsMissingParameter(){
-		client.get()
-				.uri("/review")
-				.accept(APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isEqualTo(BAD_REQUEST)
-				.expectHeader().contentType(APPLICATION_JSON)
-				.expectBody()
+		getAndVerifyReviewsByProductId("", BAD_REQUEST)
 				.jsonPath("$.path").isEqualTo("/review")
 				.jsonPath("$.message").isEqualTo("Required query parameter 'productId' is not present.");
 	}
 
-	//@Test
+	@Test
 	void getReviewsInvalidParameter(){
-		client.get()
-				.uri("/review?productId=no-integer")
-				.accept(APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isEqualTo(BAD_REQUEST)
-				.expectHeader().contentType(APPLICATION_JSON)
-				.expectBody()
+		getAndVerifyReviewsByProductId("?productId=no-integer", BAD_REQUEST)
 				.jsonPath("$.path").isEqualTo("/review")
 				.jsonPath("$.message").isEqualTo("Type mismatch.");
 	}
 
-	//@Test
+	@Test
 	void getReviewsInvalidParameterNegativeValue(){
 		int productId = -1;
 
-		client.get()
-				.uri("/review?productId=" + productId)
-				.accept(APPLICATION_JSON)
-				.exchange()
-				.expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
-				.expectHeader().contentType(APPLICATION_JSON)
-				.expectBody()
+		getAndVerifyReviewsByProductId("?productId=" + productId, UNPROCESSABLE_ENTITY)
 				.jsonPath("$.path").isEqualTo("/review")
-				.jsonPath("$.message").isEqualTo("Invalid productId: "  + productId);
+				.jsonPath("$.message").isEqualTo("Invalid productId: " + productId);
+	}
+
+	@Test
+	void duplicateError() {
+
+		int productId = 1;
+		int reviewId = 1;
+
+		assertEquals(0, repository.count());
+
+		postAndVerifyReview(productId, reviewId, OK)
+				.jsonPath("$.productId").isEqualTo(productId)
+				.jsonPath("$.reviewId").isEqualTo(reviewId);
+
+		assertEquals(1, repository.count());
+
+		postAndVerifyReview(productId, reviewId, UNPROCESSABLE_ENTITY)
+				.jsonPath("$.path").isEqualTo("/review")
+				.jsonPath("$.message").isEqualTo("Duplicate key, Product Id:1, Review Id:1");
+
+		assertEquals(1, repository.count());
+	}
+
+	@Test
+	void deleteReviews() {
+
+		int productId = 1;
+		int reviewId = 1;
+
+		postAndVerifyReview(productId, reviewId, OK);
+		assertEquals(1, repository.findByProductId(productId).size());
+
+		deleteAndVerifyReviewsByProductId(productId, OK);
+		assertEquals(0, repository.findByProductId(productId).size());
+
+		deleteAndVerifyReviewsByProductId(productId, OK);
 	}
 
 	private WebTestClient.BodyContentSpec getAndVerifyReviewsByProductId(int productId, HttpStatus expectedStatus) {
@@ -149,6 +143,15 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 				.exchange()
 				.expectStatus().isEqualTo(expectedStatus)
 				.expectHeader().contentType(APPLICATION_JSON)
+				.expectBody();
+	}
+
+	private WebTestClient.BodyContentSpec deleteAndVerifyReviewsByProductId(int productId, HttpStatus expectedStatus) {
+		return client.delete()
+				.uri("/review?productId=" + productId)
+				.accept(APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isEqualTo(expectedStatus)
 				.expectBody();
 	}
 }
