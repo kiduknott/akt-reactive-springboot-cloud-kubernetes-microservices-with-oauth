@@ -1,11 +1,12 @@
 server.port: 7002
 server.error.include-message: always
 
+spring.data.mongodb.auto-index-creation: true
+
 logging:
   level:
     root: INFO
     com.akt: DEBUG
-
 ---
 spring.config.activate.on-profile: docker
 
