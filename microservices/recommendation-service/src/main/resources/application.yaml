@@ -10,4 +10,6 @@ logging:
 ---
 spring.config.activate.on-profile: docker
 
+#spring.data.mongodb.auto-index-creation: true
+
 server.port: 8080

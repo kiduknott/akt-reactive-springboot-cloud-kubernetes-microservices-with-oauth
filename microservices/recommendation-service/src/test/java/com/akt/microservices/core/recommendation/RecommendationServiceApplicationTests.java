@@ -11,16 +11,16 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class RecommendationServiceApplicationTests {
+class RecommendationServiceApplicationTests extends MongoDbTestBase{
 
 	@Autowired
 	private WebTestClient webTestClient;
 
-	//@Test
+	@Test
 	void contextLoads() {
 	}
 
-	//@Test
+	@Test
 	void getRecommendationsOk(){
 		int productId = 1;
 
@@ -35,7 +35,7 @@ class RecommendationServiceApplicationTests {
 					.jsonPath("$[0].productId").isEqualTo(productId);
 	}
 
-	//@Test
+	@Test
 	void getRecommendationsNotFound() {
 		int productId = 113;
 
@@ -49,7 +49,7 @@ class RecommendationServiceApplicationTests {
 					.jsonPath("$.length()").isEqualTo(0);
 	}
 
-	//@Test
+	@Test
 	void getRecommendationsMissingParameter(){
 		webTestClient.get()
 				.uri("/recommendation")
@@ -62,7 +62,7 @@ class RecommendationServiceApplicationTests {
 					.jsonPath("$.message").isEqualTo("Required query parameter 'productId' is not present.");
 	}
 
-	//@Test
+	@Test
 	void getRecommendationsInvalidParameter(){
 		webTestClient.get()
 				.uri("/recommendation?productId=no-integer")
@@ -75,7 +75,7 @@ class RecommendationServiceApplicationTests {
 					.jsonPath("$.message").isEqualTo("Type mismatch.");
 	}
 
-	//@Test
+	@Test
 	void getRecommendationsInvalidParameterNegativeValue(){
 		int productId = -1;
 
