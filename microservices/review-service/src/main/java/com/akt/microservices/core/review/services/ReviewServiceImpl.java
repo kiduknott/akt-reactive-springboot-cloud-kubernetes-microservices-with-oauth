@@ -1,7 +1,5 @@
 package com.akt.microservices.core.review.services;
 
-import com.akt.api.core.recommendation.Recommendation;
-import com.akt.api.core.recommendation.RecommendationService;
 import com.akt.api.core.review.Review;
 import com.akt.api.core.review.ReviewService;
 import com.akt.api.exceptions.InvalidInputException;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
