@@ -1,15 +1,22 @@
 server.port: 7002
 server.error.include-message: always
 
-spring.data.mongodb.auto-index-creation: true
+spring.data.mongodb:
+  host: localhost
+  port: 27017
+  database: recommendation-db
+  auto-index-creation: true
 
 logging:
   level:
     root: INFO
     com.akt: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 ---
 spring.config.activate.on-profile: docker
 
-#spring.data.mongodb.auto-index-creation: true
+spring.data.mongodb:
+  host: mongodb
+  auto-index-creation: true
 
 server.port: 8080

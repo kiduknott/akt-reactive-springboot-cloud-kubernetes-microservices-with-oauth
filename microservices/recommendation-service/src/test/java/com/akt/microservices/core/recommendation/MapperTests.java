@@ -31,11 +31,11 @@ public class MapperTests {
 
         Recommendation newDto = mapper.entityToDto(entity);
 
-        assertEquals(entity.getProductId(), newDto.getProductId());
-        assertEquals(entity.getRecommendationId(), newDto.getRecommendationId());
-        assertEquals(entity.getAuthor(), newDto.getAuthor());
-        assertEquals(entity.getRating(), newDto.getRating());
-        assertEquals(entity.getContent(), newDto.getContent());
+        assertEquals(dto.getProductId(), newDto.getProductId());
+        assertEquals(dto.getRecommendationId(), newDto.getRecommendationId());
+        assertEquals(dto.getAuthor(), newDto.getAuthor());
+        assertEquals(dto.getRating(), newDto.getRating());
+        assertEquals(dto.getContent(), newDto.getContent());
         assertNull(newDto.getServiceAddress());
     }
 
@@ -63,11 +63,11 @@ public class MapperTests {
 
         Recommendation newDto = newDtoList.get(0);
 
-        assertEquals(entity.getProductId(), newDto.getProductId());
-        assertEquals(entity.getRecommendationId(), newDto.getRecommendationId());
-        assertEquals(entity.getAuthor(), newDto.getAuthor());
-        assertEquals(entity.getRating(), newDto.getRating());
-        assertEquals(entity.getContent(), newDto.getContent());
+        assertEquals(dto.getProductId(), newDto.getProductId());
+        assertEquals(dto.getRecommendationId(), newDto.getRecommendationId());
+        assertEquals(dto.getAuthor(), newDto.getAuthor());
+        assertEquals(dto.getRating(), newDto.getRating());
+        assertEquals(dto.getContent(), newDto.getContent());
         assertNull(newDto.getServiceAddress());
 
     }

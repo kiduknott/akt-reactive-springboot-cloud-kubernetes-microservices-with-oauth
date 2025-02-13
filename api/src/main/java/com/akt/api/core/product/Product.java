@@ -1,10 +1,10 @@
 package com.akt.api.core.product;
 
 public class Product {
-    private final int productId;
-    private final String name;
-    private final int weight;
-    private final String serviceAddress;
+    private int productId;
+    private String name;
+    private int weight;
+    private String serviceAddress;
 
     public Product() {
         productId = 0;
@@ -20,11 +20,35 @@ public class Product {
         this.serviceAddress = serviceAddress;
     }
 
-    public int getProductId() { return productId; }
+    public int getProductId() {
+        return productId;
+    }
 
-    public String getName() { return name; }
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
 
-    public int getWeight() { return weight; }
+    public String getName() {
+        return name;
+    }
 
-    public String getServiceAddress() { return serviceAddress; }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    public String getServiceAddress() {
+        return serviceAddress;
+    }
+
+    public void setServiceAddress(String serviceAddress) {
+        this.serviceAddress = serviceAddress;
+    }
 }

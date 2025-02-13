@@ -47,7 +47,7 @@ class PersistenceTests extends MongoDbTestBase{
 
        repository.save(entity);
 
-        RecommendationEntity foundEntity = repository.findById(String.valueOf(entity.getId())).get();
+        RecommendationEntity foundEntity = repository.findById(entity.getId()).get();
         assertEqualsRecommendation(entity, foundEntity);
 
         assertEquals(2, repository.count());

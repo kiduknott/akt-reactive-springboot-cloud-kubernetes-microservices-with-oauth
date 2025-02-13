@@ -15,12 +15,12 @@ public interface RecommendationMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "version", ignore = true),
     })
-    public RecommendationEntity dtoToEntity(Recommendation dto);
+    RecommendationEntity dtoToEntity(Recommendation dto);
 
     @Mappings({
             @Mapping(target = "serviceAddress", ignore = true)
     })
-    public Recommendation entityToDto(RecommendationEntity entity);
+    Recommendation entityToDto(RecommendationEntity entity);
 
     List<RecommendationEntity> dtoListToEntityList(List<Recommendation> dtoList);
 

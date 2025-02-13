@@ -21,24 +21,24 @@ class MapperTests {
 
     assertNotNull(mapper);
 
-    Review initialReview = new Review(1, 2, "a", "s", "C", "adr");
+    Review dto = new Review(1, 2, "a", "s", "C", "adr");
 
-    ReviewEntity entity = mapper.apiToEntity(initialReview);
+    ReviewEntity entity = mapper.apiToEntity(dto);
 
-    assertEquals(initialReview.getProductId(), entity.getProductId());
-    assertEquals(initialReview.getReviewId(), entity.getReviewId());
-    assertEquals(initialReview.getAuthor(), entity.getAuthor());
-    assertEquals(initialReview.getSubject(), entity.getSubject());
-    assertEquals(initialReview.getContent(), entity.getContent());
+    assertEquals(dto.getProductId(), entity.getProductId());
+    assertEquals(dto.getReviewId(), entity.getReviewId());
+    assertEquals(dto.getAuthor(), entity.getAuthor());
+    assertEquals(dto.getSubject(), entity.getSubject());
+    assertEquals(dto.getContent(), entity.getContent());
 
-    Review transformedReview = mapper.entityToApi(entity);
+    Review newDto = mapper.entityToApi(entity);
 
-    assertEquals(initialReview.getProductId(), transformedReview.getProductId());
-    assertEquals(initialReview.getReviewId(), transformedReview.getReviewId());
-    assertEquals(initialReview.getAuthor(), transformedReview.getAuthor());
-    assertEquals(initialReview.getSubject(), transformedReview.getSubject());
-    assertEquals(initialReview.getContent(), transformedReview.getContent());
-    assertNull(transformedReview.getServiceAddress());
+    assertEquals(dto.getProductId(), newDto.getProductId());
+    assertEquals(dto.getReviewId(), newDto.getReviewId());
+    assertEquals(dto.getAuthor(), newDto.getAuthor());
+    assertEquals(dto.getSubject(), newDto.getSubject());
+    assertEquals(dto.getContent(), newDto.getContent());
+    assertNull(newDto.getServiceAddress());
   }
 
   @Test
@@ -46,30 +46,30 @@ class MapperTests {
 
     assertNotNull(mapper);
 
-    Review initialReview = new Review(1, 2, "a", "s", "C", "adr");
-    List<Review> initialReviewList = Collections.singletonList(initialReview);
+    Review dto = new Review(1, 2, "a", "s", "C", "adr");
+    List<Review> dtoList = Collections.singletonList(dto);
 
-    List<ReviewEntity> entityList = mapper.apiListToEntityList(initialReviewList);
-    assertEquals(initialReviewList.size(), entityList.size());
+    List<ReviewEntity> entityList = mapper.apiListToEntityList(dtoList);
+    assertEquals(dtoList.size(), entityList.size());
 
     ReviewEntity entity = entityList.get(0);
 
-    assertEquals(initialReview.getProductId(), entity.getProductId());
-    assertEquals(initialReview.getReviewId(), entity.getReviewId());
-    assertEquals(initialReview.getAuthor(), entity.getAuthor());
-    assertEquals(initialReview.getSubject(), entity.getSubject());
-    assertEquals(initialReview.getContent(), entity.getContent());
+    assertEquals(dto.getProductId(), entity.getProductId());
+    assertEquals(dto.getReviewId(), entity.getReviewId());
+    assertEquals(dto.getAuthor(), entity.getAuthor());
+    assertEquals(dto.getSubject(), entity.getSubject());
+    assertEquals(dto.getContent(), entity.getContent());
 
-    List<Review> transformedReviewList = mapper.entityListToApiList(entityList);
-    assertEquals(initialReviewList.size(), transformedReviewList.size());
+    List<Review> newDtoList = mapper.entityListToApiList(entityList);
+    assertEquals(dtoList.size(), newDtoList.size());
 
-    Review transformedReview = transformedReviewList.get(0);
+    Review newDto = newDtoList.get(0);
 
-    assertEquals(initialReview.getProductId(), transformedReview.getProductId());
-    assertEquals(initialReview.getReviewId(), transformedReview.getReviewId());
-    assertEquals(initialReview.getAuthor(), transformedReview.getAuthor());
-    assertEquals(initialReview.getSubject(), transformedReview.getSubject());
-    assertEquals(initialReview.getContent(), transformedReview.getContent());
-    assertNull(transformedReview.getServiceAddress());
+    assertEquals(dto.getProductId(), newDto.getProductId());
+    assertEquals(dto.getReviewId(), newDto.getReviewId());
+    assertEquals(dto.getAuthor(), newDto.getAuthor());
+    assertEquals(dto.getSubject(), newDto.getSubject());
+    assertEquals(dto.getContent(), newDto.getContent());
+    assertNull(newDto.getServiceAddress());
   }
 }

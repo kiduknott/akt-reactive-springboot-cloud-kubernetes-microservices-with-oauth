@@ -4,35 +4,68 @@ import com.akt.api.core.product.Product;
 import com.akt.api.core.product.ProductService;
 import com.akt.api.exceptions.InvalidInputException;
 import com.akt.api.exceptions.NotFoundException;
+import com.akt.microservices.core.product.persistence.ProductEntity;
+import com.akt.microservices.core.product.persistence.ProductRepository;
 import com.akt.util.http.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProductServiceImpl implements ProductService {
-    private final ServiceUtil serviceUtil;
 
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
-    @Autowired
-    public ProductServiceImpl(ServiceUtil serviceUtil) {
+    private final ProductRepository repository;
+    private final ProductMapper mapper;
+    private final ServiceUtil serviceUtil;
+
+    public ProductServiceImpl(ProductRepository repository, ProductMapper mapper, ServiceUtil serviceUtil) {
+        this.repository = repository;
+        this.mapper = mapper;
         this.serviceUtil = serviceUtil;
     }
 
     @Override
-    public Product getProduct(int productId) {
-        logger.debug("/getProduct call for productId={}", productId);
+    public Product createProduct(Product body) {
+        logger.debug("createProduct call for productId={}", body.getProductId());
 
-        if(productId < 1) {
+        try {
+            ProductEntity entity = mapper.dtoToEntity(body);
+            ProductEntity newEntity = repository.save(entity);
+
+            logger.debug("createProduct: entity created for productId: {}", body.getProductId());
+            return mapper.entityToDto(newEntity);
+
+        } catch (DuplicateKeyException exception) {
+            throw new InvalidInputException("Duplicate key, Product Id: " + body.getProductId());
+        }
+    }
+
+    @Override
+    public Product getProduct(int productId) {
+        logger.debug("getProduct call for productId={}", productId);
+
+        if (productId < 1) {
             throw new InvalidInputException("Invalid productId: " + productId);
         }
 
-        if(productId == 123){
-            throw new NotFoundException("No product found for productId: " + productId);
-        }
+        ProductEntity entity = repository.findByProductId(productId)
+                .orElseThrow(() -> new NotFoundException("No product found for productId: " + productId));
 
-        return new Product(productId, "name-" + productId, 123, serviceUtil.getServiceAddress());
+        Product product = mapper.entityToDto(entity);
+        product.setServiceAddress(serviceUtil.getServiceAddress());
+
+        logger.debug("getProduct: found productId: {}", product.getProductId());
+
+        return product;
+    }
+
+    @Override
+    public void deleteProduct(int productId) {
+        logger.debug("deleteProduct: deleting product with productId: {}", productId);
+        repository.findByProductId(productId).ifPresent(repository::delete);
     }
 }
