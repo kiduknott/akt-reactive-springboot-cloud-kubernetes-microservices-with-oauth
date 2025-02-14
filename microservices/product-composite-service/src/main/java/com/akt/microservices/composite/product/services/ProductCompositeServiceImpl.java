@@ -31,6 +31,8 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
 
     @Override
     public ProductAggregate getProduct(int productId) {
+        logger.debug("getProduct: getting composite aggregate for productId: {}", productId);
+
         Product product = productCompositeIntegration.getProduct(productId);
 
         if(product == null) {
@@ -45,10 +47,10 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
 
     @Override
     public void createProduct(ProductAggregate body) {
+
+        logger.debug("createCompositeProduct: creating a new composite entity for productId: {}", body.getProductId());
+
         try {
-
-            logger.debug("createCompositeProduct: creating a new composite entity for productId: {}", body.getProductId());
-
             Product product = new Product(body.getProductId(), body.getName(), body.getWeight(), null);
             productCompositeIntegration.createProduct(product);
 

@@ -30,13 +30,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(Product body) {
-        logger.debug("createProduct call for productId={}", body.getProductId());
+        logger.info("createProduct call for productId={}", body.getProductId());
 
         try {
             ProductEntity entity = mapper.dtoToEntity(body);
             ProductEntity newEntity = repository.save(entity);
 
-            logger.debug("createProduct: entity created for productId: {}", body.getProductId());
+            logger.info("createProduct: entity created for productId: {}", body.getProductId());
             return mapper.entityToDto(newEntity);
 
         } catch (DuplicateKeyException exception) {
@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(int productId) {
-        logger.debug("getProduct call for productId={}", productId);
+        logger.info("getProduct call for productId={}", productId);
 
         if (productId < 1) {
             throw new InvalidInputException("Invalid productId: " + productId);
@@ -58,14 +58,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = mapper.entityToDto(entity);
         product.setServiceAddress(serviceUtil.getServiceAddress());
 
-        logger.debug("getProduct: found productId: {}", product.getProductId());
+        logger.info("getProduct: found productId: {}", product.getProductId());
 
         return product;
     }
 
     @Override
     public void deleteProduct(int productId) {
-        logger.debug("deleteProduct: deleting product with productId: {}", productId);
+        logger.info("deleteProduct: deleting product with productId: {}", productId);
         repository.findByProductId(productId).ifPresent(repository::delete);
     }
 }

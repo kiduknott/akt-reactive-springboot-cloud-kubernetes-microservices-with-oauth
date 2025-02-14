@@ -45,16 +45,18 @@ public class ProductCompositeIntegration {
        @Value("${app.recommendation-service.port}") String recommendationServicePort,
        @Value("${app.review-service.host}") String reviewServiceHost,
        @Value("${app.review-service.port}") String reviewServicePort) {
+
         this.restTemplate = restTemplate;
         this.mapper = mapper;
-        this.productServiceUrl = "http://" + productServiceHost + ":" + productServicePort + "/product/";
-        this.recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation?productId=";
-        this.reviewServiceUrl = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review?productId=";
+
+        productServiceUrl = "http://" + productServiceHost + ":" + productServicePort + "/product";
+        recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation";
+        reviewServiceUrl = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review";
     }
 
     public Product getProduct(int productId){
         try{
-            String url = productServiceUrl + productId;
+            String url = productServiceUrl +  "/" + productId;
 
             logger.debug("Calling getProduct API on URL: {}", url);
 
@@ -77,7 +79,7 @@ public class ProductCompositeIntegration {
 
     public List<Recommendation> getRecommendations(int productId){
         try{
-            String url = recommendationServiceUrl + productId;
+            String url = recommendationServiceUrl + "?productId=" + productId;
 
             logger.debug("Calling getRecommedandations API on URL: {}", url);
             List<Recommendation> recommendations = restTemplate
@@ -93,7 +95,7 @@ public class ProductCompositeIntegration {
 
     public List<Review> getReviews(int productId) {
         try{
-            String url = reviewServiceUrl + productId;
+            String url = reviewServiceUrl + "?productId=" + productId;
 
             logger.debug("Calling getReviews API on URL: {}", url);
             List<Review> reviews = restTemplate
@@ -164,7 +166,7 @@ public class ProductCompositeIntegration {
     public void deleteRecommendations(int productId) {
         try {
             String url = recommendationServiceUrl + "?productId=" + productId;
-            logger.debug("Will call the deleteRecommendations API on URL: {}", url);
+            logger.debug("Calling the deleteRecommendations API on URL: {}", url);
 
             restTemplate.delete(url);
         } catch (HttpClientErrorException exception) {
@@ -175,7 +177,7 @@ public class ProductCompositeIntegration {
     public void deleteReviews(int productId) {
         try {
             String url = reviewServiceUrl + "?productId=" + productId;
-            logger.debug("Will call the deleteReviews API on URL: {}", url);
+            logger.debug("Calling the deleteReviews API on URL: {}", url);
 
             restTemplate.delete(url);
         } catch (HttpClientErrorException exception) {

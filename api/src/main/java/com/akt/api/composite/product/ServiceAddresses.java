@@ -7,6 +7,13 @@ public class ServiceAddresses {
     private final String reviewAddress;
     private final String recommendationAddress;
 
+    public ServiceAddresses() {
+        this.compositeAddress = null;
+        this.productAddress = null;
+        this.reviewAddress = null;
+        this.recommendationAddress = null;
+    }
+
     public ServiceAddresses(String compositeAddress,
                             String productAddress,
                             String reviewAddress,
