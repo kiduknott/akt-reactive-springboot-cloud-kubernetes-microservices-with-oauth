@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -106,11 +107,103 @@ public class ProductCompositeIntegration {
         }
     }
 
+    public Product createProduct(Product body) {
+        try {
+            String url = productServiceUrl;
+            logger.debug("Posting a new product to URL: {}", url);
+
+            Product product = restTemplate.postForObject(url, body, Product.class);
+            logger.debug("Created a product with id: {}", product.getProductId());
+
+            return product;
+
+        } catch (HttpClientErrorException exception) {
+            throw handleHttpClientException(exception);
+        }
+    }
+
+    public Recommendation createRecommendation(Recommendation body) {
+        try {
+            String url = recommendationServiceUrl;
+            logger.debug("Posting a new recommendation to URL: {}", url);
+
+            Recommendation recommendation = restTemplate.postForObject(url, body, Recommendation.class);
+            logger.debug("Created a recommendation with id: {}", recommendation.getProductId());
+
+            return recommendation;
+        } catch (HttpClientErrorException exception) {
+            throw handleHttpClientException(exception);
+        }
+    }
+
+    public Review createReview(Review body) {
+        try {
+            String url = reviewServiceUrl;
+            logger.debug("Posting a new review to URL: {}", url);
+
+            Review review = restTemplate.postForObject(url, body, Review.class);
+            logger.debug("Created a Review with id: {}", review.getProductId());
+
+            return review;
+        } catch (HttpClientErrorException exception) {
+            throw handleHttpClientException(exception);
+        }
+    }
+
+    public void deleteProduct(int productId) {
+        try {
+            String url = productServiceUrl + "/" + productId;
+            logger.debug("Calling the deleteProduct API on URL: {}", url);
+
+            restTemplate.delete(url);
+        } catch (HttpClientErrorException exception) {
+            throw handleHttpClientException(exception);
+        }
+    }
+
+    public void deleteRecommendations(int productId) {
+        try {
+            String url = recommendationServiceUrl + "?productId=" + productId;
+            logger.debug("Will call the deleteRecommendations API on URL: {}", url);
+
+            restTemplate.delete(url);
+        } catch (HttpClientErrorException exception) {
+            throw handleHttpClientException(exception);
+        }
+    }
+
+    public void deleteReviews(int productId) {
+        try {
+            String url = reviewServiceUrl + "?productId=" + productId;
+            logger.debug("Will call the deleteReviews API on URL: {}", url);
+
+            restTemplate.delete(url);
+        } catch (HttpClientErrorException exception) {
+            throw handleHttpClientException(exception);
+        }
+    }
+
     private String getErrorMessage(HttpClientErrorException exception){
         try{
             return mapper.readValue(exception.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
         } catch (IOException ioException){
             return exception.getMessage();
+        }
+    }
+
+    private RuntimeException handleHttpClientException(HttpClientErrorException exception) {
+        switch (Objects.requireNonNull(HttpStatus.resolve(exception.getStatusCode().value()))) {
+
+            case NOT_FOUND:
+                return new NotFoundException(getErrorMessage(exception));
+
+            case UNPROCESSABLE_ENTITY:
+                return new InvalidInputException(getErrorMessage(exception));
+
+            default:
+                logger.warn("Got an unexpected HTTP error: {}, will rethrow it", exception.getStatusCode());
+                logger.warn("Error body: {}", exception.getResponseBodyAsString());
+                return exception;
         }
     }
 }

@@ -38,7 +38,7 @@ public interface ProductCompositeService {
      *
      * @param body A JSON representation of the new composite product
      */
-    /*@Operation(
+    @Operation(
             summary = "${api.product-composite.create-composite-product.description}",
             description = "${api.product-composite.create-composite-product.notes}")
     @ApiResponses(value = {
@@ -48,14 +48,14 @@ public interface ProductCompositeService {
     @PostMapping(
             value = "/product-composite",
             consumes = "application/json")
-    void createProduct(@RequestBody ProductAggregate body);*/
+    void createProduct(@RequestBody ProductAggregate body);
 
     /**
      * Sample usage: "curl -X DELETE $HOST:$PORT/product-composite/1".
      *
      * @param productId Id of the product
      */
-    /*@Operation(
+    @Operation(
             summary = "${api.product-composite.delete-composite-product.description}",
             description = "${api.product-composite.delete-composite-product.notes}")
     @ApiResponses(value = {
@@ -63,5 +63,5 @@ public interface ProductCompositeService {
             @ApiResponse(responseCode = "422", description = "${api.responseCodes.unprocessableEntity.description}")
     })
     @DeleteMapping(value = "/product-composite/{productId}")
-    void deleteProduct(@PathVariable int productId);*/
+    void deleteProduct(@PathVariable int productId);
 }
