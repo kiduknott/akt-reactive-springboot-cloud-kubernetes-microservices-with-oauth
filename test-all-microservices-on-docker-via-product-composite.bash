@@ -10,6 +10,7 @@
 : ${PROD_ID_NOT_FOUND=123}
 : ${PROD_ID_NO_RECOMMENDATIONS=113}
 : ${PROD_ID_NO_REVIEWS=213}
+: ${MAX_RETRIES=20}
 
 function assertCurl() {
 
@@ -80,16 +81,60 @@ function waitForService() {
   until testUrl $url
   do
     n=$((n + 1))
-    if [[ $n == 100 ]]
+    if [[ $n == $MAX_RETRIES ]]
     then
       echo " Give up"
       exit 1
     else
-      sleep 3
+      sleep 1
       echo -n ", retry #$n "
     fi
   done
   echo "DONE, continues..."
+}
+
+function recreateComposite() {
+  local productId=$1
+  local composite=$2
+
+  assertCurl 200 "curl -X DELETE http://$HOST:$PORT/product-composite/${productId} -s"
+  curl -X POST http://$HOST:$PORT/product-composite -H "Content-Type: application/json" --data "$composite"
+}
+
+function setupTestdata() {
+
+  body="{\"productId\":$PROD_ID_NO_RECOMMENDATIONS"
+  body+=\
+',"name":"product name A","weight":100, "reviews":[
+  {"reviewId":1,"author":"author 1","subject":"subject 1","content":"content 1"},
+  {"reviewId":2,"author":"author 2","subject":"subject 2","content":"content 2"},
+  {"reviewId":3,"author":"author 3","subject":"subject 3","content":"content 3"}
+]}'
+  recreateComposite "$PROD_ID_NO_RECOMMENDATIONS" "$body"
+
+  body="{\"productId\":$PROD_ID_NO_REVIEWS"
+  body+=\
+',"name":"product name B","weight":200, "recommendations":[
+  {"recommendationId":1,"author":"author 1","rating":1,"content":"content 1"},
+  {"recommendationId":2,"author":"author 2","rating":2,"content":"content 2"},
+  {"recommendationId":3,"author":"author 3","rating":3,"content":"content 3"}
+]}'
+  recreateComposite "$PROD_ID_NO_REVIEWS" "$body"
+
+
+  body="{\"productId\":$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS"
+  body+=\
+',"name":"product name C","weight":300, "recommendations":[
+      {"recommendationId":1,"author":"author 1","rating":1,"content":"content 1"},
+      {"recommendationId":2,"author":"author 2","rating":2,"content":"content 2"},
+      {"recommendationId":3,"author":"author 3","rating":3,"content":"content 3"}
+  ], "reviews":[
+      {"reviewId":1,"author":"author 1","subject":"subject 1","content":"content 1"},
+      {"reviewId":2,"author":"author 2","subject":"subject 2","content":"content 2"},
+      {"reviewId":3,"author":"author 3","subject":"subject 3","content":"content 3"}
+  ]}'
+  recreateComposite "$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS" "$body"
+
 }
 
 set -e
@@ -107,6 +152,10 @@ then
   echo "$ docker compose up -d"
   docker compose up -d
 fi
+
+waitForService curl -X DELETE http://$HOST:$PORT/product-composite/$PROD_ID_NOT_FOUND
+
+setupTestdata
 
 waitForService curl http://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS
 
