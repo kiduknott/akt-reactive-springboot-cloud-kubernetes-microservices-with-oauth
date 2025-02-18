@@ -1,6 +1,7 @@
 package com.akt.microservices.core.product;
 
 import com.akt.api.core.product.Product;
+import com.akt.api.exceptions.InvalidInputException;
 import com.akt.microservices.core.product.persistence.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -27,7 +27,7 @@ class ProductServiceApplicationTests extends MongoDbTestBase{
 
 	@BeforeEach
 	void setupDb() {
-		repository.deleteAll();
+		repository.deleteAll().block();
 	}
 
 	@Test
@@ -38,9 +38,13 @@ class ProductServiceApplicationTests extends MongoDbTestBase{
 	void getProductByProductId(){
 		int productId = 1;
 
+		assertNull(repository.findByProductId(productId).block());
+		assertEquals(0, (long)repository.count().block());
+
 		postAndVerifyProduct(productId, OK);
 
-		assertTrue(repository.findByProductId(productId).isPresent());
+		assertNotNull(repository.findByProductId(productId).block());
+		assertEquals(1, (long)repository.count().block());
 
 		getAndVerifyProduct(productId, OK)
 				.jsonPath("$.productId").isEqualTo(productId);
@@ -74,12 +78,13 @@ class ProductServiceApplicationTests extends MongoDbTestBase{
 
 	@Test
 	void duplicateError() {
-
 		int productId = 1;
+
+		assertNull(repository.findByProductId(productId).block());
 
 		postAndVerifyProduct(productId, OK);
 
-		assertTrue(repository.findByProductId(productId).isPresent());
+		assertNotNull(repository.findByProductId(productId).block());
 
 		postAndVerifyProduct(productId, UNPROCESSABLE_ENTITY)
 				.jsonPath("$.path").isEqualTo("/product")
@@ -92,10 +97,10 @@ class ProductServiceApplicationTests extends MongoDbTestBase{
 		int productId = 1;
 
 		postAndVerifyProduct(productId, OK);
-		assertTrue(repository.findByProductId(productId).isPresent());
+		assertNotNull(repository.findByProductId(productId).block());
 
 		deleteAndVerifyProduct(productId, OK);
-		assertFalse(repository.findByProductId(productId).isPresent());
+		assertNull(repository.findByProductId(productId).block());
 
 		deleteAndVerifyProduct(productId, OK);
 	}
