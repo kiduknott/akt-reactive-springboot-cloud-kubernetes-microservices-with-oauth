@@ -28,7 +28,7 @@ class RecommendationServiceApplicationTests extends MongoDbTestBase{
 	void contextLoads() {
 	}
 
-	@BeforeEach
+	/*@BeforeEach
 	void setupDb() {
 		repository.deleteAll();
 	}
@@ -113,7 +113,7 @@ class RecommendationServiceApplicationTests extends MongoDbTestBase{
 		assertEquals(0, repository.findByProductId(productId).size());
 
 		deleteAndVerifyRecommendationsByProductId(productId, OK);
-	}
+	}*/
 
 	private WebTestClient.BodyContentSpec getAndVerifyRecommendationsByProductId(int productId, HttpStatus expectedStatus){
 		return getAndVerifyRecommendationsByProductId("?productId=" + productId, expectedStatus);

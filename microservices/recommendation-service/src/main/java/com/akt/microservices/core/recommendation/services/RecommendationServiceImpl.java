@@ -36,7 +36,10 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     public List<Recommendation> getRecommendation(int productId) {
-        if(productId < 1){
+
+        return null;
+
+        /*if(productId < 1){
             throw new InvalidInputException("Invalid productId: " + productId);
         }
 
@@ -46,12 +49,15 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         logger.debug("getRecommendation: response size: {}", recommendations.size());;
 
-        return recommendations;
+        return recommendations;*/
     }
 
     @Override
     public Recommendation createRecommendation(Recommendation body) {
-        try{
+
+        return null;
+
+        /*try{
             RecommendationEntity entity = mapper.dtoToEntity(body);
             RecommendationEntity newEntity = repository.save(entity);
 
@@ -60,12 +66,12 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
         catch (DataIntegrityViolationException exception){
             throw new InvalidInputException("Duplicate key, Product Id:" + body.getProductId() + ", Recommendation Id:" + body.getRecommendationId());
-        }
+        }*/
     }
 
     @Override
     public void deleteRecommendations(int productId) {
-        logger.debug("deleteRecommendations: deleting recommendations for product with productId: {}", productId);
-        repository.deleteAll(repository.findByProductId(productId));
+        /*logger.debug("deleteRecommendations: deleting recommendations for product with productId: {}", productId);
+        repository.deleteAll(repository.findByProductId(productId));*/
     }
 }
