@@ -12,9 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.util.List;
+
+import static java.util.logging.Level.FINE;
 
 @RestController
 public class ReviewServiceImpl implements ReviewService {
@@ -38,22 +42,37 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> getReview(int productId) {
+    public Flux<Review> getReviews(int productId) {
         if(productId < 1){
             throw new InvalidInputException("Invalid productId: " + productId);
         }
 
-        return internalGetReviews(productId);
+        return Mono.fromCallable(() -> internalGetReviews(productId))
+                .flatMapMany(Flux::fromIterable)
+                .log(logger.getName(), FINE)
+                .subscribeOn(jdbcScheduler);
     }
 
     @Override
-    public Review createReview(Review body) {
-        return internalCreateReview(body);
+    public Mono<Review> createReview(Review body) {
+        int productId = body.getProductId();
+
+        if(productId < 1){
+            throw new InvalidInputException("Invalid productId: " + productId);
+        }
+
+        return Mono.fromCallable(() -> internalCreateReview(body))
+                .subscribeOn(jdbcScheduler);
     }
 
     @Override
-    public void deleteReviews(int productId) {
-        internalDeleteReviews(productId);
+    public Mono<Void> deleteReviews(int productId) {
+        if(productId < 1){
+            throw new InvalidInputException("Invalid productId: " + productId);
+        }
+
+        return Mono.fromRunnable(() -> internalDeleteReviews(productId))
+                .subscribeOn(jdbcScheduler).then();
     }
 
     private List<Review> internalGetReviews(int productId) {
