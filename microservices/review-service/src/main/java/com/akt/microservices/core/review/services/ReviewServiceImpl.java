@@ -9,8 +9,10 @@ import com.akt.util.http.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.scheduler.Scheduler;
 
 import java.util.List;
 
@@ -22,12 +24,17 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository repository;
     private final ReviewMapper mapper;
     private final ServiceUtil serviceUtil;
+    private final Scheduler jdbcScheduler;
 
     @Autowired
-    public ReviewServiceImpl(ReviewRepository repository, ReviewMapper mapper, ServiceUtil serviceUtil) {
+    public ReviewServiceImpl(ReviewRepository repository,
+                             ReviewMapper mapper,
+                             ServiceUtil serviceUtil,
+                             @Qualifier("jdbcScheduler") Scheduler jdbcScheduler) {
         this.repository = repository;
         this.mapper = mapper;
         this.serviceUtil = serviceUtil;
+        this.jdbcScheduler = jdbcScheduler;
     }
 
     @Override
@@ -36,6 +43,20 @@ public class ReviewServiceImpl implements ReviewService {
             throw new InvalidInputException("Invalid productId: " + productId);
         }
 
+        return internalGetReviews(productId);
+    }
+
+    @Override
+    public Review createReview(Review body) {
+        return internalCreateReview(body);
+    }
+
+    @Override
+    public void deleteReviews(int productId) {
+        internalDeleteReviews(productId);
+    }
+
+    private List<Review> internalGetReviews(int productId) {
         List<ReviewEntity> entityList = repository.findByProductId(productId);
         List<Review> reviews = mapper.entityListToApiList(entityList);
         reviews.forEach(r -> r.setServiceAddress(serviceUtil.getServiceAddress()));
@@ -45,8 +66,7 @@ public class ReviewServiceImpl implements ReviewService {
         return reviews;
     }
 
-    @Override
-    public Review createReview(Review body) {
+    private Review internalCreateReview(Review body) {
         try{
             ReviewEntity entity = mapper.apiToEntity(body);
             ReviewEntity newEntity = repository.save(entity);
@@ -59,8 +79,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
-    @Override
-    public void deleteReviews(int productId) {
+    private void internalDeleteReviews(int productId) {
         logger.debug("deleteReviews: deleting reviews for product with productId: {}", productId);
         repository.deleteAll(repository.findByProductId(productId));
     }
