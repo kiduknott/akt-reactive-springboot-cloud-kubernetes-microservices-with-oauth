@@ -2,7 +2,6 @@ package com.akt.microservices.core.recommendation.services;
 
 import com.akt.api.core.recommendation.Recommendation;
 import com.akt.api.core.recommendation.RecommendationService;
-import com.akt.api.core.review.Review;
 import com.akt.api.exceptions.InvalidInputException;
 import com.akt.microservices.core.recommendation.persistence.RecommendationEntity;
 import com.akt.microservices.core.recommendation.persistence.RecommendationRepository;
@@ -11,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
+import static java.util.logging.Level.FINE;
 
 @RestController
 public class RecommendationServiceImpl implements RecommendationService {
@@ -35,43 +36,53 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public List<Recommendation> getRecommendation(int productId) {
+    public Flux<Recommendation> getRecommendations(int productId) {
 
-        return null;
-
-        /*if(productId < 1){
+        if(productId < 1){
             throw new InvalidInputException("Invalid productId: " + productId);
         }
 
-        List<RecommendationEntity> entityList = repository.findByProductId(productId);
-        List<Recommendation> recommendations = mapper.entityListToDtoList(entityList);
-        recommendations.forEach(r -> r.setServiceAddress(serviceUtil.getServiceAddress()));
+        Flux<Recommendation> entities = repository.findByProductId(productId)
+                .log(logger.getName(), FINE)
+                .map(e -> mapper.entityToDto(e))
+                .map(e -> setServiceAddress(e));
 
-        logger.debug("getRecommendation: response size: {}", recommendations.size());;
+        logger.debug("getRecommendations: returned recommendations for productId: {}", productId);;
 
-        return recommendations;*/
+        return entities;
     }
 
     @Override
-    public Recommendation createRecommendation(Recommendation body) {
-
-        return null;
-
-        /*try{
-            RecommendationEntity entity = mapper.dtoToEntity(body);
-            RecommendationEntity newEntity = repository.save(entity);
-
-            logger.debug("createReview: created a new entity: {}/{}", body.getProductId(), body.getRecommendationId());
-            return mapper.entityToDto(newEntity);
+    public Mono<Recommendation> createRecommendation(Recommendation body) {
+        if (body.getProductId() < 1) {
+            throw new InvalidInputException("Invalid productId: " + body.getProductId());
         }
-        catch (DataIntegrityViolationException exception){
-            throw new InvalidInputException("Duplicate key, Product Id:" + body.getProductId() + ", Recommendation Id:" + body.getRecommendationId());
-        }*/
+
+        RecommendationEntity entity = mapper.dtoToEntity(body);
+
+        Mono<Recommendation> newEntity = repository.save(entity)
+                .log(logger.getName(), FINE)
+                .onErrorMap(
+                        DuplicateKeyException.class,
+                        ex -> new InvalidInputException("Duplicate key, Product Id:" + body.getProductId() + ", Recommendation Id:" + body.getRecommendationId()))
+                .map(e -> mapper.entityToDto(e));
+
+        return newEntity;
     }
 
     @Override
-    public void deleteRecommendations(int productId) {
-        /*logger.debug("deleteRecommendations: deleting recommendations for product with productId: {}", productId);
-        repository.deleteAll(repository.findByProductId(productId));*/
+    public Mono<Void> deleteRecommendations(int productId) {
+        if (productId < 1) {
+            throw new InvalidInputException("Invalid productId: " + productId);
+        }
+
+        logger.debug("deleteRecommendations: deleting recommendations for product with productId: {}", productId);
+
+        return repository.deleteAll(repository.findByProductId(productId));
+    }
+
+    private Recommendation setServiceAddress(Recommendation recommendation) {
+        recommendation.setServiceAddress(serviceUtil.getServiceAddress());
+        return recommendation;
     }
 }
