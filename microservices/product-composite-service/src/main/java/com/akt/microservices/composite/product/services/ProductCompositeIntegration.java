@@ -105,6 +105,9 @@ public class ProductCompositeIntegration {
         String url = productServiceUrl + "/product";
         logger.debug("Posting a new product to URL: {}", url);
 
+        //TODO: Read: https://stackoverflow.com/questions/58441110/wait-for-multiple-spring-webclient-mono-responses
+        //TODO: Read: 4.3. Multiple Calls to Different Services Different Types in https://www.baeldung.com/spring-webclient-simultaneous-calls
+
         Mono<Product> productMono =  webClient.post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
