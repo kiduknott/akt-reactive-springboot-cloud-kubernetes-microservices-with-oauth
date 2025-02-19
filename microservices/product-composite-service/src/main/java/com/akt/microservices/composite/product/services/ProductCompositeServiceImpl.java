@@ -57,7 +57,11 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
             List<Mono> monoList = new ArrayList<>();
 
             Product product = new Product(body.getProductId(), body.getName(), body.getWeight(), null);
-            monoList.add(productCompositeIntegration.createProduct(product));
+
+            Mono<Product> productMono = productCompositeIntegration.createProduct(product);
+            monoList.add(productMono);
+
+            //monoList.add(productCompositeIntegration.createProduct(product));
 
             if (body.getRecommendations() != null) {
                 body.getRecommendations().forEach(r -> {
@@ -104,7 +108,6 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
             throw exception;
         }
     }
-
 
     private ProductAggregate createProductAggregate(Product product,
                                                     List<Recommendation> recommendations,

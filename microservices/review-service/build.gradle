@@ -18,16 +18,17 @@ jar {
 
 ext{
 	mapStructVersion = "1.5.3.Final"
+	springCloudVersion = "2024.0.0"
 }
 
 dependencies {
+	implementation project(':api')
+	implementation project(':util')
+
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
-
-	implementation project(':api')
-	implementation project(':util')
 
 	implementation "org.mapstruct:mapstruct:${mapStructVersion}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapStructVersion}"
@@ -43,6 +44,15 @@ dependencies {
 
 	implementation 'com.mysql:mysql-connector-j'
 	testImplementation 'org.testcontainers:mysql'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit'
+	implementation 'org.springframework.cloud:spring-cloud-starter-stream-kafka'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
 }
 
 tasks.named('test') {
