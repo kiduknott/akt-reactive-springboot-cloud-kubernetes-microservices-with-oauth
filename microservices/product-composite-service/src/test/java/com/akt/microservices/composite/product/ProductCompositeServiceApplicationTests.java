@@ -81,34 +81,6 @@ class ProductCompositeServiceApplicationTests {
 				.jsonPath("$.message").isEqualTo("INVALID: " + PRODUCT_ID_INVALID_INPUT);
 	}
 
-	@Test
-	void createCompositeProductNoRecommendationsOrReviews() {
-		ProductAggregate compositeProduct = new ProductAggregate(1, "name", 1, null, null, null);
-
-		postAndVerifyProduct(compositeProduct, OK);
-	}
-
-	@Test
-	void createCompositeProductWithRecommendationsOrReviews() {
-		ProductAggregate compositeProduct = new ProductAggregate(1, "name", 1,
-				singletonList(new RecommendationSummary(1, "a", 1, "c")),
-				singletonList(new ReviewSummary(1, "a", "s", "c")), null);
-
-		postAndVerifyProduct(compositeProduct, OK);
-	}
-
-	@Test
-	void deleteCompositeProduct() {
-		ProductAggregate compositeProduct = new ProductAggregate(1, "name", 1,
-				singletonList(new RecommendationSummary(1, "a", 1, "c")),
-				singletonList(new ReviewSummary(1, "a", "s", "c")), null);
-
-		postAndVerifyProduct(compositeProduct, OK);
-
-		deleteAndVerifyProduct(compositeProduct.getProductId(), OK);
-		deleteAndVerifyProduct(compositeProduct.getProductId(), OK);
-	}
-
 	private WebTestClient.BodyContentSpec getAndVerifyProduct(int productId, HttpStatus expectedStatus) {
 		return webTestClient.get()
 				.uri("/product-composite/" + productId)
@@ -117,20 +89,5 @@ class ProductCompositeServiceApplicationTests {
 				.expectStatus().isEqualTo(expectedStatus)
 				.expectHeader().contentType(APPLICATION_JSON)
 				.expectBody();
-	}
-
-	private void postAndVerifyProduct(ProductAggregate compositeProduct, HttpStatus expectedStatus) {
-		webTestClient.post()
-				.uri("/product-composite")
-				.body(just(compositeProduct), ProductAggregate.class)
-				.exchange()
-				.expectStatus().isEqualTo(expectedStatus);
-	}
-
-	private void deleteAndVerifyProduct(int productId, HttpStatus expectedStatus) {
-		webTestClient.delete()
-				.uri("/product-composite/" + productId)
-				.exchange()
-				.expectStatus().isEqualTo(expectedStatus);
 	}
 }

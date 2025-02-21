@@ -4,7 +4,6 @@ import com.akt.api.composite.product.*;
 import com.akt.api.core.product.Product;
 import com.akt.api.core.recommendation.Recommendation;
 import com.akt.api.core.review.Review;
-import com.akt.api.exceptions.NotFoundException;
 import com.akt.util.http.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +98,7 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
                     productCompositeIntegration.deleteRecommendations(productId),
                     productCompositeIntegration.deleteReviews(productId))
                     .doOnError(ex -> logger.warn("deleteProduct failed: {}", ex.toString()))
+                    .log(logger.getName(), FINE)
                     .then();
 
             logger.debug("deleteCompositeProduct: aggregate entities deleted for productId: {}", productId);
