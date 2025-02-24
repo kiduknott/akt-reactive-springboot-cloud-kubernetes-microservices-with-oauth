@@ -83,22 +83,22 @@ function waitForService() {
     n=$((n + 1))
     if [[ $n == $MAX_RETRIES ]]
     then
-      echo " Give up"
+      echo "Retries timed out..."
       exit 1
     else
       sleep 1
       echo -n ", retry #$n "
     fi
   done
-  echo "DONE, continues..."
+  echo "DONE, continuing..."
 }
 
 function recreateComposite() {
   local productId=$1
   local composite=$2
 
-  assertCurl 200 "curl -X DELETE http://$HOST:$PORT/product-composite/${productId} -s"
-  curl -X POST http://$HOST:$PORT/product-composite -H "Content-Type: application/json" --data "$composite"
+  assertCurl 202 "curl -X DELETE http://$HOST:$PORT/product-composite/${productId} -s"
+  assertEqual 202 $(curl -X POST http://$HOST:$PORT/product-composite -H "Content-Type: application/json" --data "$composite" -w "%{http_code}")
 }
 
 function setupTestdata() {
@@ -134,6 +134,59 @@ function setupTestdata() {
       {"reviewId":3,"author":"author 3","subject":"subject 3","content":"content 3"}
   ]}'
   recreateComposite "$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS" "$body"
+}
+
+function waitForMessagesToProcess(){
+  echo "Waiting for message processing to complete..."
+
+  # Give background processing some time to complete...
+  sleep 1
+
+  until testCompositeCreated
+  do
+    n=$((n + 1))
+    if [[ $n == $MAX_RETRIES ]]
+    then
+      echo "Retries timed out..."
+      exit 1
+    else
+      sleep 1
+      echo -n ", retry #$n "
+    fi
+  done
+  echo "DONE - Waiting for messages processing..."
+}
+
+function testCompositeCreated(){
+  if ! assertCurl 200 "curl http://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
+  then
+    echo -n "Fail - Call to get product composite did not return Http 200"
+    return 1
+  fi
+
+  echo $RESPONSE
+
+  set +e
+
+  assertEqual "$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS" $(echo $RESPONSE | jq .productId)
+  if [ "$?" -eq "1" ]
+  then
+    return 1
+  fi
+
+  assertEqual 3 $(echo $RESPONSE | jq ".recommendations | length")
+  if [ "$?" -eq "1" ]
+  then
+    return 1
+  fi
+
+  assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
+  if [ "$?" -eq "1" ]
+  then
+    return 1
+  fi
+
+  set -e
 
 }
 
@@ -153,11 +206,11 @@ then
   docker compose up -d
 fi
 
-waitForService curl -X DELETE http://$HOST:$PORT/product-composite/$PROD_ID_NOT_FOUND
+waitForService curl http://$HOST:$PORT/actuator/health
 
 setupTestdata
 
-waitForService curl http://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS
+waitForMessagesToProcess
 
 # Verify that a normal request works, expect three recommendations and three reviews
 assertCurl 200 "curl http://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
