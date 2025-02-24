@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -71,6 +72,18 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
         productServiceUrl = "http://" + productServiceHost + ":" + productServicePort;
         recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort;
         reviewServiceUrl = "http://" + reviewServiceHost + ":" + reviewServicePort;
+    }
+
+    public Mono<Health> getProductHealth() {
+        return getHealth(productServiceUrl);
+    }
+
+    public Mono<Health> getRecommendationHealth() {
+        return getHealth(recommendationServiceUrl);
+    }
+
+    public Mono<Health> getReviewHealth() {
+        return getHealth(reviewServiceUrl);
     }
 
     public Mono<Product> getProduct(int productId){
@@ -232,5 +245,18 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
                 .setHeader("partitionKey", event.getKey())
                 .build();
         streamBridge.send(bindingName, message);
+    }
+
+    private Mono<Health> getHealth(String url) {
+        url += "/actuator/health";
+        logger.debug("Calling the health API on URL: {}", url);
+
+        return webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(s -> new Health.Builder().up().build())
+                .onErrorResume(ex -> Mono.just(new Health.Builder().down(ex).build()))
+                .log(logger.getName(), FINE);
     }
 }
