@@ -5,5 +5,3 @@ include ':microservices:product-composite-service'
 include 'api'
 include 'util'
 include 'spring-cloud:eureka-server'
-
-
