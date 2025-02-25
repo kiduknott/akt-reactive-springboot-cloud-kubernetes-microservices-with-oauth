@@ -219,38 +219,38 @@ waitForMessagesToProcess
 
 # Verify that a normal request works, expect three recommendations and three reviews
 assertCurl 200 "curl http://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
-echo "[1].\n$RESPONSE"
+echo -e "[1].\n$RESPONSE"
 assertEqual $PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS $(echo $RESPONSE | jq .productId)
 assertEqual 3 $(echo $RESPONSE | jq ".recommendations | length")
 assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
 
 # Verify that a 404 (Not Found) error is returned for a non-existing productId ($PROD_ID_NOT_FOUND)
 assertCurl 404 "curl http://$HOST:$PORT/product-composite/$PROD_ID_NOT_FOUND -s"
-echo "[2].\n$RESPONSE"
+echo -e "[2].\n$RESPONSE"
 assertContains "No product found for productId: $PROD_ID_NOT_FOUND" "$(echo $RESPONSE | jq -r .message)"
 
 # Verify that no recommendations are returned for productId $PROD_ID_NO_RECOMMENDATIONS
 assertCurl 200 "curl http://$HOST:$PORT/product-composite/$PROD_ID_NO_RECOMMENDATIONS -s"
-echo "[3].\n$RESPONSE"
+echo -e "[3].\n$RESPONSE"
 assertEqual $PROD_ID_NO_RECOMMENDATIONS $(echo $RESPONSE | jq .productId)
 assertEqual 0 $(echo $RESPONSE | jq ".recommendations | length")
 assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
 
 # Verify that no reviews are returned for productId $PROD_ID_NO_REVIEWS
 assertCurl 200 "curl http://$HOST:$PORT/product-composite/$PROD_ID_NO_REVIEWS -s"
-echo "[4].\n$RESPONSE"
+echo -e "[4].\n$RESPONSE"
 assertEqual $PROD_ID_NO_REVIEWS $(echo $RESPONSE | jq .productId)
 assertEqual 3 $(echo $RESPONSE | jq ".recommendations | length")
 assertEqual 0 $(echo $RESPONSE | jq ".reviews | length")
 
 # Verify that a 422 (Unprocessable Entity) error is returned for a productId that is out of range (-1)
 assertCurl 422 "curl http://$HOST:$PORT/product-composite/-1 -s"
-echo "[5].\n$RESPONSE"
+echo -e "[5].\n$RESPONSE"
 assertContains "Invalid productId: -1" "$(echo $RESPONSE | jq .message)"
 
 # Verify that a 400 (Bad Request) error error is returned for a productId that is not a number, i.e. invalid format
 assertCurl 400 "curl http://$HOST:$PORT/product-composite/invalidProductId -s"
-echo "[6].\n$RESPONSE"
+echo -e "[6].\n$RESPONSE"
 assertContains "\"Type mismatch.\"" "$(echo $RESPONSE | jq .message)"
 
 # Verify access to Swagger and OpenAPI urls

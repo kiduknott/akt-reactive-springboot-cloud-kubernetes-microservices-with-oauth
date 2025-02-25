@@ -39,7 +39,6 @@ dependencies {
 	testImplementation 'org.testcontainers:testcontainers'
 	testImplementation 'org.testcontainers:junit-jupiter'
 
-	//Breaks the build
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	implementation 'com.mysql:mysql-connector-j'
@@ -47,6 +46,8 @@ dependencies {
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit'
 	implementation 'org.springframework.cloud:spring-cloud-starter-stream-kafka'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
 
 dependencyManagement {

@@ -1,8 +1,5 @@
 package com.akt.microservices.composite.product;
 
-import com.akt.api.composite.product.ProductAggregate;
-import com.akt.api.composite.product.RecommendationSummary;
-import com.akt.api.composite.product.ReviewSummary;
 import com.akt.api.core.product.Product;
 import com.akt.api.core.recommendation.Recommendation;
 import com.akt.api.core.review.Review;
@@ -24,9 +21,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static reactor.core.publisher.Mono.just;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"eureka.client.enabled=false"})
 class ProductCompositeServiceApplicationTests {
 
 	private static final int PRODUCT_ID_OK = 1;
