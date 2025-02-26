@@ -81,7 +81,7 @@ eureka:
     registryFetchIntervalSeconds: 5
   instance:
     leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 53
+    leaseExpirationDurationInSeconds: 5
 
 spring.cloud.stream:
   defaultBinder: rabbit
