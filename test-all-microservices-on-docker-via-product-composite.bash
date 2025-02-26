@@ -215,7 +215,7 @@ waitForService curl http://$HOST:$PORT/actuator/health
 
 # Verify access to Eureka and that all four microservices are registered in Eureka
 assertCurl 200 "curl -H "accept:application/json" $HOST:8761/eureka/apps -s"
-assertEqual 4 $(echo $RESPONSE | jq ".applications.application | length")
+assertEqual 5 $(echo $RESPONSE | jq ".applications.application | length")
 
 setupTestdata
 
