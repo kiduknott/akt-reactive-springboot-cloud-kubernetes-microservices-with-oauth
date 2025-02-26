@@ -98,10 +98,12 @@ function recreateComposite() {
   local composite=$2
 
   assertCurl 202 "curl -X DELETE http://$HOST:$PORT/product-composite/${productId} -s"
-  assertEqual 202 $(curl -X POST http://$HOST:$PORT/product-composite -H "Content-Type: application/json" --data "$composite" -w "%{http_code}")
+  assertEqual 202 $(curl -X POST -s http://$HOST:$PORT/product-composite -H "Content-Type: application/json" --data "$composite" -w "%{http_code}")
 }
 
 function setupTestdata() {
+
+  echo "Started - Seeding test data ..."
 
   body="{\"productId\":$PROD_ID_NO_RECOMMENDATIONS"
   body+=\
@@ -134,6 +136,8 @@ function setupTestdata() {
       {"reviewId":3,"author":"author 3","subject":"subject 3","content":"content 3"}
   ]}'
   recreateComposite "$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS" "$body"
+
+  echo "Completed - Test data seeded"
 }
 
 function waitForMessagesToProcess(){
@@ -214,7 +218,7 @@ fi
 waitForService curl http://$HOST:$PORT/actuator/health
 
 # Verify access to Eureka and that all four microservices are registered in Eureka
-assertCurl 200 "curl -H "accept:application/json" $HOST:8761/eureka/apps -s"
+assertCurl 200 "curl -H "accept:application/json" $HOST:$PORT/eureka/apps -s"
 assertEqual 5 $(echo $RESPONSE | jq ".applications.application | length")
 
 setupTestdata

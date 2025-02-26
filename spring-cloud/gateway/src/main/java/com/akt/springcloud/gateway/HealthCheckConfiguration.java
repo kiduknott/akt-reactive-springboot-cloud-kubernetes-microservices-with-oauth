@@ -2,6 +2,7 @@ package com.akt.springcloud.gateway;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.CompositeReactiveHealthContributor;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.ReactiveHealthContributor;
@@ -23,12 +24,13 @@ public class HealthCheckConfiguration {
 
     private WebClient webClient;
 
+    @Autowired
     public HealthCheckConfiguration(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
     }
 
     @Bean
-    ReactiveHealthContributor healthCheckMicroservices(){
+    ReactiveHealthContributor healthcheckMicroservices(){
         final Map<String, ReactiveHealthIndicator> registry = new LinkedHashMap<>();
 
         registry.put("product,", () -> getHealth("http://product"));
@@ -48,7 +50,7 @@ public class HealthCheckConfiguration {
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(s -> new Health.Builder().up().build())
-                .onErrorResume(ex -> Mono.just(new Health.Builder().down().build()))
+                .onErrorResume(ex -> Mono.just(new Health.Builder().down(ex).build()))
                 .log(logger.getName(), FINE);
     }
 }
