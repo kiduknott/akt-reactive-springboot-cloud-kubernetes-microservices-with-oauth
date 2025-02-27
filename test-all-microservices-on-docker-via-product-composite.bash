@@ -230,7 +230,7 @@ setupTestdata
 waitForMessagesToProcess
 
 # Verify that a normal request works, expect three recommendations and three reviews
-assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_REVS_RECS -s"
+assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
 echo -e "[1].\n$RESPONSE"
 assertEqual $PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS $(echo $RESPONSE | jq .productId)
 assertEqual 3 $(echo $RESPONSE | jq ".recommendations | length")
@@ -242,14 +242,14 @@ echo -e "[2].\n$RESPONSE"
 assertContains "No product found for productId: $PROD_ID_NOT_FOUND" "$(echo $RESPONSE | jq -r .message)"
 
 # Verify that no recommendations are returned for productId $PROD_ID_NO_RECOMMENDATIONS
-assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_NO_RECS -s"
+assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_NO_RECOMMENDATIONS -s"
 echo -e "[3].\n$RESPONSE"
 assertEqual $PROD_ID_NO_RECOMMENDATIONS $(echo $RESPONSE | jq .productId)
 assertEqual 0 $(echo $RESPONSE | jq ".recommendations | length")
 assertEqual 3 $(echo $RESPONSE | jq ".reviews | length")
 
 # Verify that no reviews are returned for productId $PROD_ID_NO_REVIEWS
-assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_NO_REVS -s"
+assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_NO_REVIEWS -s"
 echo -e "[4].\n$RESPONSE"
 assertEqual $PROD_ID_NO_REVIEWS $(echo $RESPONSE | jq .productId)
 assertEqual 3 $(echo $RESPONSE | jq ".recommendations | length")
@@ -266,15 +266,15 @@ echo -e "[6].\n$RESPONSE"
 assertContains "\"Type mismatch.\"" "$(echo $RESPONSE | jq .message)"
 
 # Verify that a request without access token fails on 401, Unauthorized
-assertCurl 401 "curl -k https://$HOST:$PORT/product-composite/$PROD_ID_REVS_RECS -s"
+assertCurl 401 "curl -k https://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
 
 # Verify that the reader - client with only read scope can call the read API but not delete API.
 READER_ACCESS_TOKEN=$(curl -k https://reader:secret-reader@$HOST:$PORT/oauth2/token -d grant_type=client_credentials -d scope="product:read" -s | jq .access_token -r)
 echo READER_ACCESS_TOKEN=$READER_ACCESS_TOKEN
 READER_AUTH="-H \"Authorization: Bearer $READER_ACCESS_TOKEN\""
 
-assertCurl 200 "curl $READER_AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_REVS_RECS -s"
-assertCurl 403 "curl -X DELETE $READER_AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_REVS_RECS -s"
+assertCurl 200 "curl $READER_AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
+assertCurl 403 "curl -X DELETE $READER_AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
 
 # Verify access to Swagger and OpenAPI urls
 echo "Swagger and OpenAPI tests"
