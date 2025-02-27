@@ -22,7 +22,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"eureka.client.enabled=false"})
+@SpringBootTest(webEnvironment = RANDOM_PORT,
+		classes = {SecurityConfigTests.class},
+		properties = {
+				"eureka.client.enabled=false",
+				"spring.security.oauth2.resourceserver.jwt.issuer-uri=",
+				"spring.main.allow-bean-definition-overriding=true"})
 class ProductCompositeServiceApplicationTests {
 
 	private static final int PRODUCT_ID_OK = 1;
