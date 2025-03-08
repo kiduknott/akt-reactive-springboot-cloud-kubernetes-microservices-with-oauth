@@ -130,7 +130,7 @@ class MessagingTests {
     }
 
     //TODO: Fix the intermittent bug affecting this test
-    //@Test
+    @Test
     void deleteCompositeProduct() {
         deleteAndVerifyProduct(1, ACCEPTED);
 

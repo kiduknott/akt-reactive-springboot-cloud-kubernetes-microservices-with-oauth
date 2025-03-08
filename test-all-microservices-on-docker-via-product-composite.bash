@@ -169,7 +169,7 @@ function testCompositeCreated(){
   fi
 
   #TODO: FIX - Something wrong with Kafka messaging such that 200 OK is returned before reviews are added to the response
-  sleep 5
+  #sleep 5
 
   assertCurl 200 "curl $AUTH -k https://$HOST:$PORT/product-composite/$PROD_ID_RETURN_REVIEWS_RECOMMENDATIONS -s"
 
