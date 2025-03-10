@@ -2,7 +2,7 @@
 #
 # Sample usage:
 #
-# ./test-all-microservices-on-docker-via-product-composite.bash start stop
+# ./test-all-microservices-on-docker-via-product-composite-02.bash start stop
 #
 : ${HOST=localhost}
 : ${PORT=8443}
