@@ -24,7 +24,7 @@ import static reactor.core.publisher.Mono.just;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {
 		"spring.cloud.stream.defaultBinder=rabbit",
-		"logging.level.se.magnus=DEBUG",
+		"logging.level.com.akt=DEBUG",
 		"eureka.client.enabled=false"})
 class ProductServiceApplicationTests extends MongoDbTestBase{
 
