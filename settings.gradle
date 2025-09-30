@@ -4,4 +4,6 @@ include ':microservices:recommendation-service'
 include ':microservices:product-composite-service'
 include 'api'
 include 'util'
-
+include 'spring-cloud:eureka-server'
+include 'spring-cloud:gateway'
+include 'spring-cloud:authorization-server'

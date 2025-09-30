@@ -1,21 +1,32 @@
 package com.akt.microservices.core.review;
 
 import com.akt.api.core.review.Review;
+import com.akt.api.event.Event;
+import com.akt.api.exceptions.InvalidInputException;
 import com.akt.microservices.core.review.persistence.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.function.Consumer;
+
+import static com.akt.api.event.Event.Type.CREATE;
+import static com.akt.api.event.Event.Type.DELETE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static reactor.core.publisher.Mono.just;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {
+		"eureka.client.enabled=false",
+		"logging.level.com.akt=DEBUG",
+		"spring.cloud.stream.defaultBinder=rabbit"})
 class ReviewServiceApplicationTests extends MySqlTestBase {
 
 	@Autowired
@@ -23,6 +34,10 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 
 	@Autowired
 	private ReviewRepository repository;
+
+	@Autowired
+	@Qualifier("messageProcessor")
+	private Consumer<Event<Integer, Review>> messageProcessor;
 
 	@Test
 	void contextLoads() {
@@ -37,9 +52,13 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 	void getReviewsByProductId(){
 		int productId = 1;
 
-		postAndVerifyReview(productId, 1, OK);
+		sendCreateReviewEvent(productId, 1);
+		sendCreateReviewEvent(productId, 2);
+		sendCreateReviewEvent(productId, 3);
+
+		/*postAndVerifyReview(productId, 1, OK);
 		postAndVerifyReview(productId, 2, OK);
-		postAndVerifyReview(productId, 3, OK);
+		postAndVerifyReview(productId, 3, OK);*/
 
 		assertEquals(3, repository.findByProductId(productId).size());
 
@@ -88,16 +107,16 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 
 		assertEquals(0, repository.count());
 
-		postAndVerifyReview(productId, reviewId, OK)
-				.jsonPath("$.productId").isEqualTo(productId)
-				.jsonPath("$.reviewId").isEqualTo(reviewId);
+		sendCreateReviewEvent(productId, reviewId);
 
 		assertEquals(1, repository.count());
 
-		postAndVerifyReview(productId, reviewId, UNPROCESSABLE_ENTITY)
-				.jsonPath("$.path").isEqualTo("/review")
-				.jsonPath("$.message").isEqualTo("Duplicate key, Product Id:1, Review Id:1");
+		InvalidInputException thrown = assertThrows(
+				InvalidInputException.class,
+				() -> sendCreateReviewEvent(productId, reviewId),
+				"Expected a InvalidInputException here!");
 
+		assertEquals("Duplicate key, Product Id:" + productId + ", Review Id:" + reviewId, thrown.getMessage());
 		assertEquals(1, repository.count());
 	}
 
@@ -107,13 +126,13 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 		int productId = 1;
 		int reviewId = 1;
 
-		postAndVerifyReview(productId, reviewId, OK);
+		sendCreateReviewEvent(productId, reviewId);
 		assertEquals(1, repository.findByProductId(productId).size());
 
-		deleteAndVerifyReviewsByProductId(productId, OK);
+		sendDeleteReviewEvent(productId);
 		assertEquals(0, repository.findByProductId(productId).size());
 
-		deleteAndVerifyReviewsByProductId(productId, OK);
+		sendDeleteReviewEvent(productId);
 	}
 
 	private WebTestClient.BodyContentSpec getAndVerifyReviewsByProductId(int productId, HttpStatus expectedStatus) {
@@ -149,5 +168,16 @@ class ReviewServiceApplicationTests extends MySqlTestBase {
 				.exchange()
 				.expectStatus().isEqualTo(expectedStatus)
 				.expectBody();
+	}
+
+	private void sendCreateReviewEvent(int productId, int reviewId) {
+		Review review = new Review(productId, reviewId, "Author " + reviewId, "Subject " + reviewId, "Content " + reviewId, "SA");
+		Event<Integer, Review> event = new Event<>(CREATE, productId, review);
+		messageProcessor.accept(event);
+	}
+
+	private void sendDeleteReviewEvent(int productId) {
+		Event<Integer, Review> event = new Event<>(DELETE, productId, null);
+		messageProcessor.accept(event);
 	}
 }

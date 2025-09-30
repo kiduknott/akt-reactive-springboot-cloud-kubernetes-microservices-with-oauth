@@ -1,9 +1,8 @@
 package com.akt.api.core.review;
 
-import java.util.List;
-
-import com.akt.api.core.recommendation.Recommendation;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
 public interface ReviewService {
@@ -17,7 +16,7 @@ public interface ReviewService {
     @GetMapping(
             value = "/review",
             produces = "application/json")
-    List<Review> getReview(@RequestParam(value = "productId", required = true) int productId);
+    Flux<Review> getReviews(@RequestParam(value = "productId", required = true) int productId);
 
     /**
      * Sample usage, see below.
@@ -33,13 +32,14 @@ public interface ReviewService {
             value    = "/review",
             consumes = "application/json",
             produces = "application/json")
-    Review createReview(@RequestBody Review body);
+    Mono<Review> createReview(@RequestBody Review body);
 
     /**
      * Sample usage: "curl -X DELETE $HOST:$PORT/review?productId=1".
      *
      * @param productId Id of the product
+     * @return
      */
     @DeleteMapping(value = "/review")
-    void deleteReviews(@RequestParam(value = "productId", required = true) int productId);
+    Mono<Void> deleteReviews(@RequestParam(value = "productId", required = true) int productId);
 }
