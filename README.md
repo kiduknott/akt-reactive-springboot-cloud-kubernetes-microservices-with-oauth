@@ -1,18 +1,21 @@
-# 📦 Repo Overview: `akt-reactive-springboot-cloud-kubernetes-microservices-with-oauth`
+# ⚙️ Reactive Spring Boot Microservices with OAuth, Docker, and Kubernetes
 
-**Author**: [kiduknott](https://github.com/kiduknott)  
-**Repo**: [GitHub Link](https://github.com/kiduknott/akt-reactive-springboot-cloud-kubernetes-microservices-with-oauth)  
-**Tech Stack**:
-- Spring Boot (Reactive)
-- OAuth 2.0 + OIDC
-- Docker + Kubernetes
-- Microservices architecture
-- Gradle multi-project setup
-- RabbitMQ + Kafka (via Docker Compose)
+This project demonstrates a secure, reactive microservices architecture using Spring Boot, OAuth 2.0/OIDC, Docker, and Kubernetes. It includes API gateway routing, service discovery, message-based integration, and automated testing.
+
+![System Diagram](system-diagram.png)
+
+## 🚀 Tech Stack
+
+- **Spring Boot (WebFlux)** — Reactive microservices
+- **OAuth 2.0 + OIDC** — Secure authentication and token validation
+- **Docker & Docker Compose** — Containerized deployment
+- **Kubernetes-ready** — Modular structure for cloud-native orchestration
+- **RabbitMQ & Kafka** — Event and message-based communication
+- **Gradle Multi-Project** — Modular build and dependency management
 
 ---
 
-## 📁 Key Folders
+## 📁 Project Structure
 
 | Folder | Description |
 |--------|-------------|
@@ -24,12 +27,12 @@
 
 ---
 
-## 🔐 Security Highlights
+## 🔐 Security Architecture
 
-- OAuth 2.0 and OIDC integration
-- HTTPS enforcement via keystore
-- API gateway secured with token validation
-- Conditional access simulated via scopes and roles
+- OAuth 2.0 and OIDC integration via Spring Security
+- HTTPS enforced via keystore configuration
+- Token validation and role-based access control
+- Conditional access simulated via scopes and claims
 
 ---
 
